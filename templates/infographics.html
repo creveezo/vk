@@ -1,0 +1,501 @@
+{% extends 'base.html' %}
+{% block title %} аналитика по VK {% endblock %}
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<h1>Инфографика сообщества</h1>
+<img id="avatar" src="{{ general['response']['groups'][0]['photo_100'] }}" width="80px" align="left" vspace="5" hspace="15">
+<h3>{{ general['response']['groups'][0]['name'] }}</h3>
+<p>Всего подписчиков: {{ general['response']['groups'][0]['members_count'] }}<br>Из них проанализировано: <span id="total"></span></p>
+
+<h4>Общая информация</h4>
+<p>Прямо сейчас онлайн: <span id="online"></span></p>
+<p>Верифицированных аккаунтов: <span id="verified"></span></p>
+<p>Закрытых аккаунтов: <span id="closed"></span></p>
+<p>Удалённых аккаунтов: <span id="deleted"></span></p>
+
+<h4>Соотношение по полу:</h4>
+<div class="container">
+  <div>
+    <canvas id="sexChart"></canvas>
+  </div>
+</div>
+
+<h4>Соотношение по возрасту:</h4>
+<div class="container">
+  <div>
+    <canvas id="ageChart"></canvas>
+  </div>
+</div>
+
+<h4>Дни рождения:</h4>
+<div class="container">
+  <div>
+    <canvas id="monthChart"></canvas>
+  </div>
+</div>
+
+<h4>Отношения с другими людьми</h4>
+<h5>Семейное положение:</h5>
+<div class="container">
+  <div>
+    <canvas id="relationsChart"></canvas>
+  </div>
+</div>
+
+<h5>Популярность подписчиков данного сообщества:</h5>
+<p>По оси Х: размер аудитории. По оси У: количество человек, подписанных на это сообщество, с данной аудиторией.</p>
+<div class="container">
+  <div>
+    <canvas id="popularityChart"></canvas>
+  </div>
+</div>
+
+<h4>Персональное</h4>
+<h5>Отношение к алкоголю и курению:</h5>
+<div class="container">
+  <div>
+    <canvas id="smokChart"></canvas>
+  </div>
+</div>
+
+<h5>Политические взгляды:</h5>
+<div class="container">
+  <div>
+    <canvas id="politChart"></canvas>
+  </div>
+</div>
+
+<h5>Главное в людях:</h5>
+<div class="container">
+  <div>
+    <canvas id="peopleChart"></canvas>
+  </div>
+</div>
+
+<h5>Главное в жизни:</h5>
+<div class="container">
+  <div>
+    <canvas id="lifeChart"></canvas>
+  </div>
+</div>
+
+<h4>Основные языки:</h4>
+<div class="container">
+  <div>
+    <canvas id="langChart"></canvas>
+  </div>
+</div>
+
+<h4>Образование</h4>
+<h5>Университет:</h5>
+<p>(первые 15 позиций)</p>
+<div class="container">
+  <div>
+    <canvas id="uniChart"></canvas>
+  </div>
+</div>
+
+<h5>Факультет:</h5>
+<p>(первые 15 позиций)</p>
+<div class="container">
+  <div>
+    <canvas id="facChart"></canvas>
+  </div>
+</div>
+
+<h5>Год выпуска:</h5>
+<div class="container">
+  <div>
+    <canvas id="alumniChart"></canvas>
+  </div>
+</div>
+
+<h4>Тип занятости:</h4>
+<div class="container">
+  <div>
+    <canvas id="occChart"></canvas>
+  </div>
+</div>
+
+<h4>Города:</h4>
+<p>(Первые 20 городов)</p>
+<div class="container">
+  <div>
+    <canvas id="cityChart"></canvas>
+  </div>
+</div>
+
+{% if public_dict['games'] != 'no_common' %}
+<h4>Общие интересы. Игры:</h4>
+<p>(учитываются общие интересы 3х и более людей)</p>
+<div class="container">
+  <div>
+    <canvas id="gameChart"></canvas>
+  </div>
+</div>
+{% endif %}
+
+{% if public_dict['movies'] != 'no_common' %}
+<h4>Общие интересы. Фильмы:</h4>
+<p>(учитываются общие интересы 3х и более людей)</p>
+<div class="container">
+  <div>
+    <canvas id="filmChart"></canvas>
+  </div>
+</div>
+{% endif %}
+
+{% if public_dict['music'] != 'no_common' %}
+<h4>Общие интересы. Музыка:</h4>
+<p>(учитываются общие интересы 3х и более людей)</p>
+<div class="container">
+  <div>
+    <canvas id="musicChart"></canvas>
+  </div>
+</div>
+{% endif %}
+
+{% if public_dict['interests'] != 'no_common' %}
+<h4>Общие интересы. Обобщенное:</h4>
+<p>(учитываются общие интересы 3х и более людей)</p>
+<div class="container">
+  <div>
+    <canvas id="generalChart"></canvas>
+  </div>
+</div>
+{% endif %}
+
+<script>
+  var myData = {{ public_json | safe }}
+  console.log(myData);
+
+  const total = document.getElementById('total');
+  total.innerHTML = `${myData.total}`;
+
+  const online = document.getElementById('online');
+  online.innerHTML = `${myData.online_rn}`;
+
+  const verified = document.getElementById('verified');
+  verified.innerHTML = `${myData.verified}`;
+
+  const closed = document.getElementById('closed');
+  closed.innerHTML = `${myData.closed}`;
+
+  const deleted = document.getElementById('deleted');
+  deleted.innerHTML = `${myData.deleted_accs}`;
+
+  const MONTHS = [
+    'Январь',
+    'Февраль',
+    'Март',
+    'Апрель',
+    'Май',
+    'Июнь',
+    'Июль',
+    'Август',
+    'Сентябрь',
+    'Октябрь',
+    'Ноябрь',
+    'Декабрь'
+  ];
+
+  const BARCOLOR = [
+    'rgb(233,141,172)',
+    'rgb(18,165,159)',
+    'rgb(176,185,128)',
+    'rgb(42,93,52)',
+    'rgb(1,109,158)',
+    'rgb(138,105,148)',
+    'rgb(116,43,50)',
+    'rgb(246,60,101)',
+    'rgb(156,97,115)',
+    'rgb(239,100,89)',
+    'rgb(232,129,1)',
+    'rgb(228,155,1)',
+    'rgb(140,145,17)',
+    'rgb(112,165,59)',
+    'rgb(1,75,114)',
+    'rgb(1,75,114)',
+    'rgb(97,151,83)',
+    'rgb(56,31,37)',
+    'rgb(241,126,129)'
+  ]
+
+  const REL = ['не в браке', 'есть друг/подруга', 'помолвлен(а)', 'в браке', 'всё сложно',
+              'в активном поиске', 'влюблен(а)', 'в гражданском браке']
+
+  var sexChart = new Chart(document.getElementById('sexChart').getContext('2d'),
+  {type: 'doughnut',
+    data: {
+      labels: ['male', 'female'],
+      datasets: [{
+        label: 'sex',
+        data: [myData['sex']['male'], myData['sex']['female']],
+        backgroundColor: ['rgb(68,127,193)', 'pink']
+        }]
+    },
+    options: {}
+  });
+
+  ageDict = myData['age_info']['age'];
+  var ageChart = new Chart(document.getElementById('ageChart').getContext('2d'),
+  {type: 'bar',
+    data: {
+    labels: Object.keys(ageDict),
+    datasets: [{
+      label: 'age distribution',
+      data: Object.values(ageDict),
+      backgroundColor: 'rgb(68,127,193)'
+      }]
+    },
+    options: {
+      scales: {
+        x: {ticks: {beginAtZero: false}}
+      }
+    }
+  });
+
+  monthDict = myData['age_info']['bdate_months'];
+  var monthChart = new Chart(document.getElementById('monthChart').getContext('2d'),
+  {type: 'bar',
+    data: {
+    labels: MONTHS,
+    datasets: [{
+      label: 'b-date distribution',
+      data: Object.values(monthDict),
+      backgroundColor: ['rgb(45,135,200)', 'rgb(45,135,200)', 'rgb(79,176,98)', 'rgb(79,176,98)',
+                       'rgb(79,176,98)', 'rgb(234,212,72)', 'rgb(234,212,72)', 'rgb(234,212,72)',
+                       'rgb(183,67,52)', 'rgb(183,67,52)', 'rgb(183,67,52)', 'rgb(45,135,200)']
+    }]
+    },
+    options: {
+      scales: {
+        x: {ticks: {beginAtZero: false}}
+      }}
+    });
+
+  relDict = myData['relationship'];
+  var relationsChart = new Chart(document.getElementById('relationsChart').getContext('2d'),
+  {type: 'bar',
+    data: {
+    labels: REL,
+    datasets: [{
+      label: 'relations',
+      data: Object.values(relDict),
+      backgroundColor: 'rgb(68,127,193)'
+    }]
+    },
+    options: {}
+  });
+
+  popDict = myData['user_popularity']['followers_count'];
+  var popularityChart = new Chart(document.getElementById('popularityChart').getContext('2d'),
+  {type: 'bar',
+    data: {
+    labels: Object.keys(popDict),
+    datasets: [{
+      label: 'popularity',
+      data: Object.values(popDict),
+      backgroundColor: 'rgb(68,127,193)'
+    }]
+    },
+    options: {}
+  });
+
+  smokDict = myData['personal'];
+  var smokChart = new Chart(document.getElementById('smokChart').getContext('2d'),
+  {type: 'bar',
+    data: {
+    labels: Object.keys(smokDict['smoking']),
+    datasets: [{
+        label: 'smoking',
+        data: Object.values(smokDict['smoking']),
+        backgroundColor: 'rgb(115,111,99)'
+        },
+        {
+        label: 'alcohol',
+        data: Object.values(smokDict['alcohol']),
+        backgroundColor: 'rgb(94,32,40)'
+        }]
+    },
+    options: {}
+  });
+
+  politDict = myData['personal']['political'];
+  var politChart = new Chart(document.getElementById('politChart').getContext('2d'),
+  {type: 'bar',
+    data: {
+    labels: Object.keys(politDict),
+    datasets: [{
+      label: 'political views',
+      data: Object.values(politDict),
+      backgroundColor: 'rgb(68,127,193)'
+    }]
+    },
+    options: {}
+  });
+
+  lifeDict = myData['personal']['life_main'];
+  var lifeChart = new Chart(document.getElementById('lifeChart').getContext('2d'),
+  {type: 'bar',
+    data: {
+    labels: Object.keys(lifeDict),
+    datasets: [{
+      label: 'main in life',
+      data: Object.values(lifeDict),
+      backgroundColor: 'rgb(68,127,193)'
+    }]
+    },
+    options: {}
+  });
+
+  peopleDict = myData['personal']['people_main'];
+  var peopleChart = new Chart(document.getElementById('peopleChart').getContext('2d'),
+  {type: 'bar',
+    data: {
+    labels: Object.keys(peopleDict),
+    datasets: [{
+      label: 'main in people',
+      data: Object.values(peopleDict),
+      backgroundColor: 'rgb(68,127,193)'
+    }]
+    },
+    options: {}
+  });
+
+  var langChart = new Chart(document.getElementById('langChart').getContext('2d'),
+  {type: 'pie',
+    data: {
+    labels: Object.keys(myData['personal']['langs']),
+    datasets: [{
+      label: 'language',
+      data: Object.values(myData['personal']['langs']),
+      backgroundColor: BARCOLOR
+    }]
+    },
+    options: {}
+  });
+
+  var uniChart = new Chart(document.getElementById('uniChart').getContext('2d'),
+  {type: 'pie',
+    data: {
+    labels: Object.keys(myData['universities']['name']),
+    datasets: [{
+      label: 'uni',
+      data: Object.values(myData['universities']['name']),
+      backgroundColor: BARCOLOR
+    }]
+    },
+    options: {}
+  });
+
+  var facChart = new Chart(document.getElementById('facChart').getContext('2d'),
+  {type: 'pie',
+    data: {
+    labels: Object.keys(myData['universities']['faculty']),
+    datasets: [{
+      label: 'uni',
+      data: Object.values(myData['universities']['faculty']),
+      backgroundColor: BARCOLOR
+    }]
+    },
+    options: {}
+  });
+
+  var alumniChart = new Chart(document.getElementById('alumniChart').getContext('2d'),
+  {type: 'bar',
+    data: {
+    labels: Object.keys(myData['universities']['graduation_year']),
+    datasets: [{
+      label: 'graduation distribution',
+      data: Object.values(myData['universities']['graduation_year']),
+      backgroundColor: 'rgb(68,127,193)'
+    }]
+    },
+    options: {
+      scales: {
+        x: {ticks: {beginAtZero: false}}
+      }}
+  });
+
+  var occChart = new Chart(document.getElementById('occChart').getContext('2d'),
+  {type: 'polarArea',
+    data: {
+    labels: Object.keys(myData['occupation']),
+    datasets: [{
+      label: 'occupation',
+      data: Object.values(myData['occupation']),
+      backgroundColor: ['rgb(232,141,100)', 'rgb(186,255,168)', 'rgb(143,143,255)']
+    }]
+    },
+    options: {}
+  });
+
+  var cityChart = new Chart(document.getElementById('cityChart').getContext('2d'),
+  {type: 'pie',
+    data: {
+    labels: Object.keys(myData['city']),
+    datasets: [{
+      label: 'city',
+      data: Object.values(myData['city']),
+      backgroundColor: BARCOLOR
+    }]
+    },
+    options: {}
+  });
+
+  var gameChart = new Chart(document.getElementById('gameChart').getContext('2d'),
+  {type: 'pie',
+    data: {
+    labels: Object.keys(myData['games']),
+    datasets: [{
+      label: 'games',
+      data: Object.values(myData['games']),
+      backgroundColor: BARCOLOR
+    }]
+    },
+    options: {}
+  });
+
+  var filmChart = new Chart(document.getElementById('filmChart').getContext('2d'),
+  {type: 'pie',
+    data: {
+    labels: Object.keys(myData['movies']),
+    datasets: [{
+      label: 'movies',
+      data: Object.values(myData['movies']),
+      backgroundColor: BARCOLOR
+    }]
+    },
+    options: {}
+  });
+
+  var musicChart = new Chart(document.getElementById('musicChart').getContext('2d'),
+  {type: 'pie',
+    data: {
+    labels: Object.keys(myData['music']),
+    datasets: [{
+      label: 'music',
+      data: Object.values(myData['music']),
+      backgroundColor: BARCOLOR
+    }]
+    },
+    options: {}
+  });
+
+  var generalChart = new Chart(document.getElementById('generalChart').getContext('2d'),
+  {type: 'pie',
+    data: {
+    labels: Object.keys(myData['interests']),
+    datasets: [{
+      label: 'interests',
+      data: Object.values(myData['interests']),
+      backgroundColor: BARCOLOR
+    }]
+    },
+    options: {}
+  });
+</script>
+
+{% endblock %}

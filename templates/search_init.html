@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %} Добавление новости {% endblock %}
+{% block content %}
+<h1>Введите айди сообщества:</h1>
+<form method="post">
+    <p>
+        <input type="text" name="title" size="50"
+                placeholder=' например: "dodo", "53484080"' >
+    </p>
+
+    {% if error == 'no_title' %}<p class="error">Введите айди сообщества.</p>{% endif %}
+    {% if error == 'access_denied' %}<p class="error">Отсутствует информация об участниках сообщества</p>{% endif %}
+    {% if error == 'wrong_name' %}<p class="error">Айди введён неправильно или такого сообщества не существует, попробуйте снова</p>{% endif %}
+
+    <p>Внимание! после нажатия на кнопку нужно будет немного подождать (около минутки)</p>
+    <p>
+        <button type="submit" class="btn btn-outline-secondary">Submit</button>
+    </p>
+</form>
+{% endblock %}
