@@ -1,0 +1,94 @@
+html {
+    font-size: 16px;
+}
+
+body {
+    min-width: 320px;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 50%;
+}
+
+nav {
+    background-color: #447fc1 !important;
+}
+
+.float-end {
+    margin-right: 10px;
+}
+
+.float-start {
+    margin-left: 10px;
+}
+
+.container {
+    margin: 10px;
+    margin-bottom: 40px;
+}
+
+.btn-outline-danger {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    border-color: #447fc1 !important;
+    color: #447fc1 !important;
+}
+
+.btn-outline-danger:hover {
+    background-color: #447fc1 !important;
+    color: #fff !important;
+}
+
+.btn-outline-secondary {
+    border-color: #447fc1 !important;
+    color: #447fc1 !important;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #447fc1 !important;
+    color: #fff !important;
+}
+
+.btn-primary {
+    border-color: #d87af5 !important;
+    background-color: #e092f7 !important;
+}
+
+.error {
+    font-style: italic;
+    color: red;
+}
+
+#ageChart {
+    width:90% !important;
+}
+
+#content {
+    margin-top: 70px;
+    margin-bottom: 40px;
+}
+
+#sexChart {
+    width:40% !important;
+}
+
+#occChart {
+    width:40% !important;
+}
+
+#popularityChart {
+    width:60% !important;
+}
+
+#alumniChart {
+    width:70% !important;
+}
+
+canvas{
+  width:50% !important;
+  height:50% !important;
+}
