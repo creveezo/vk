@@ -16,21 +16,19 @@ db = SQLAlchemy(app)
 
 @app.route('/', methods=('GET', 'POST'))
 def create():
-    if request.method == 'POST':
-
-        title = request.form['title']
+    if request.method == 'GET':
+        title = request.args.get('title')
         values = {'title': title}
-        if not title:
-            return render_template('search_init.html', error="no_title",
-                                   values=values)
-
-        return public(id=title)
+        if title or title != '':
+            return public(id=title)
 
     return render_template('search_init.html', values={})
 
 
 @app.route('/analysis/<id>')
 def public(id):
+    if not id or id == '':
+        return render_template('search_init.html')
     values = {'title': id}
     try:
         public_json = fin(id)[0]
@@ -39,6 +37,7 @@ def public(id):
     except ValueError:
         return render_template('search_init.html', error="wrong_name",
                                values=values)
+
     if public_json == -2:
         return render_template('search_init.html', error="access_denied",
                                values=values)
