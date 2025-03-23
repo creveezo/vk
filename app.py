@@ -23,21 +23,27 @@ def create():
         if not title:
             return render_template('search_init.html', error="no_title",
                                    values=values)
-        try:
-            public_json = fin(title)[0]
-            public_dict = fin(title)[1]
-            general = basic_info(title)
-        except ValueError:
-            return render_template('search_init.html', error="wrong_name",
-                                   values=values)
-        if public_json == -2:
-            return render_template('search_init.html', error="access_denied",
-                                   values=values)
 
-        return render_template('infographics.html', values={}, public_json=public_json,
-                               general=general, public_dict=public_dict)
+        return public(id=title)
 
     return render_template('search_init.html', values={})
+
+
+@app.route('/analysis/<id>')
+def public(id):
+    values = {'title': id}
+    try:
+        public_json = fin(id)[0]
+        public_dict = fin(id)[1]
+        general = basic_info(id)
+    except ValueError:
+        return render_template('search_init.html', error="wrong_name",
+                               values=values)
+    if public_json == -2:
+        return render_template('search_init.html', error="access_denied",
+                               values=values)
+    return render_template('infographics.html', values={}, public_json=public_json,
+                           general=general, public_dict=public_dict)
 
 
 @app.route("/")
