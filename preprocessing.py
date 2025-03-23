@@ -66,7 +66,6 @@ def execute(comm_name, offset):
 # Выгрузить список пользователь в сообществе
 def list_of_members(comm_name):
     data = execute(comm_name, 0)
-    print(data)
     try:
         if data['error']:  # обрабатываем несуществующие сообщества
             print(data)
@@ -215,8 +214,11 @@ def personal_pre(column):
     for cat in transcript:
         res_fin[cat] = {}
         for num, tr in transcript[cat].items():
-            if num in res[cat]:
-                res_fin[cat][tr] = res[cat][num]
+            if cat in res:
+                if num in res[cat]:
+                    res_fin[cat][tr] = res[cat][num]
+                else:
+                    res_fin[cat][tr] = 0
             else:
                 res_fin[cat][tr] = 0
     res_fin['langs'] = res['langs']
@@ -261,7 +263,7 @@ def uni_pre(column):
     a = column.fillna(0).to_list()
     faculty = {}
     name = {}
-    grad = {}
+    grad = {2000: 0}
     for uni in a:
         if isinstance(uni, type([])):
             for i in uni:
@@ -334,7 +336,7 @@ def fin(public):
     a = list_of_members(public)
     try:
         if a['execute_errors']:
-            return -2
+            return -2, -2
     except KeyError:
         df = pd.DataFrame(a['response'])
         final = preprocess_dataframe(df)
