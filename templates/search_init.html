@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
-{% block title %} Добавление новости {% endblock %}
+{% block title %} Поиск {% endblock %}
 {% block content %}
+
+<div class="search">
 <h1>Введите айди сообщества:</h1>
 <form method="post">
     <p>
@@ -14,7 +16,8 @@
 
     <p>Внимание! после нажатия на кнопку нужно будет немного подождать (около минутки)</p>
     <p>
-        <button type="submit" class="btn btn-outline-secondary">Submit</button>
+        <button type="submit" class="btn btn-outline-secondary" onclick='document.querySelector(".loader").style.display = "flex"; document.querySelector(".search").style.display = "none"; return true;'>Submit</button>
     </p>
 </form>
+</div>
 {% endblock %}
